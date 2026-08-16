@@ -697,7 +697,9 @@
       // Optional: prefill prompt or title
     }
 
-    // Setup Web Speech Recognition (STT)
+    let sessionText = '';
+
+    // Setup Web Speech Recognition (STT) - VoiceGit Style (No Duplication)
     function setupSTT() {
       const SpeechClass = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechClass) return;
@@ -708,27 +710,18 @@
       recognition.lang = sttLang;
 
       recognition.onresult = (event) => {
-        let interim = '';
-        let finalStr = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalStr += event.results[i][0].transcript + ' ';
-          } else {
-            interim += event.results[i][0].transcript;
-          }
+        let currentSession = '';
+        for (let i = 0; i < event.results.length; ++i) {
+          currentSession += event.results[i][0].transcript + (event.results[i].isFinal ? ' ' : '');
         }
-        
+        sessionText = currentSession;
+
         const preview = document.getElementById('interimPreview');
-        if (interim) {
+        if (sessionText) {
           preview.style.display = 'block';
-          preview.innerText = '인식 중: ' + interim;
+          preview.innerText = '🎙️ 인식 중: ' + sessionText;
         } else {
           preview.style.display = 'none';
-        }
-
-        if (finalStr) {
-          const input = document.getElementById('promptInput');
-          input.value = (input.value ? input.value + ' ' : '') + finalStr;
         }
       };
 
@@ -738,7 +731,9 @@
       };
 
       recognition.onend = () => {
-        stopRecording();
+        if (isRecording) {
+          stopRecording();
+        }
       };
     }
 
@@ -756,13 +751,15 @@
         return;
       }
       try {
+        sessionText = '';
         recognition.lang = sttLang;
         recognition.start();
         isRecording = true;
         document.getElementById('btnMic').classList.add('recording');
-        document.getElementById('micLabel').innerText = '녹음 중 (터치하여 중지)';
+        document.getElementById('micLabel').innerText = '녹음 중 (터치하여 완료)';
         document.getElementById('micIcon').innerText = '⏹️';
-        showToast('마이크에 말씀하세요...', '🎙️');
+        document.getElementById('interimPreview').style.display = 'block';
+        document.getElementById('interimPreview').innerText = '🎙️ 마이크에 말씀하세요...';
       } catch (e) {
         console.error(e);
       }
@@ -774,6 +771,15 @@
       document.getElementById('micLabel').innerText = '마이크 음성 인식 시작';
       document.getElementById('micIcon').innerText = '🎤';
       document.getElementById('interimPreview').style.display = 'none';
+
+      // Append finalized speech text exactly once
+      if (sessionText.trim()) {
+        const input = document.getElementById('promptInput');
+        const prev = input.value.trim();
+        input.value = prev ? `${prev} ${sessionText.trim()}` : sessionText.trim();
+        sessionText = '';
+      }
+
       try { recognition && recognition.stop(); } catch {}
     }
 

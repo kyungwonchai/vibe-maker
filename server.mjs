@@ -234,7 +234,8 @@ const handleExecute = async (req, res) => {
     const autoGitCmd = `(git init 2>/dev/null; git add -A; git commit -m "Auto update via agy" 2>/dev/null; gh repo create kyungwonchai/${targetName} --public --source=. --remote=origin --push 2>/dev/null || git push origin main 2>/dev/null || true)`;
     const autoRegCmd = `(node /home/kw/kwsoft/vibe-maker/scripts/auto-register.mjs "${targetName}" 10148 "🚀" "${targetName} 앱" 2>/dev/null || true)`;
 
-    const fullCmd = `${AGY_BIN} --approval-mode=yolo --skip-trust '${escapedPrompt}' && ${autoGitCmd} && ${autoRegCmd}${exitCmd}`;
+    // Run agy with non-interactive auto-approval flags
+    const fullCmd = `${AGY_BIN} --dangerously-skip-permissions -p '${escapedPrompt}' && ${autoGitCmd} && ${autoRegCmd}${exitCmd}`;
 
     execFileSync('tmux', ['send-keys', '-t', cleanSessionName, fullCmd, 'Enter'], { env: ENV });
 
