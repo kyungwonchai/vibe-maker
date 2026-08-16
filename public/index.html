@@ -178,7 +178,33 @@
       box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
     }
 
-    /* Form Fields */
+    .subfilter-btn {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .subfilter-btn.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--primary);
+      color: #93c5fd;
+    }
+
+    optgroup {
+      background: #0f172a;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+    optgroup option {
+      background: #131b2e;
+      color: #f1f5f9;
+    }
     .form-group {
       display: flex;
       flex-direction: column;
@@ -449,12 +475,26 @@
         </button>
       </div>
 
-      <!-- Modify Mode App Dropdown -->
+      <!-- Modify Mode App Dropdown with Sub-filter -->
       <div class="form-group" id="groupAppSelect">
         <label class="form-label" for="appSelect">
-          <span>앱 폴더 선택 (kwsoft / home)</span>
+          <span>앱 폴더 선택</span>
           <span id="appCount" style="color: #64748b;">로딩 중...</span>
         </label>
+        
+        <!-- App Category Filter Tabs -->
+        <div class="app-subfilter-tabs" style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <button type="button" class="subfilter-btn active" id="filterKwboard" onclick="setAppFilter('kwboard')">
+            ⭐ KW보드 등재앱 (<span id="countKwboard">0</span>)
+          </button>
+          <button type="button" class="subfilter-btn" id="filterUnregistered" onclick="setAppFilter('unregistered')">
+            ⚪ 기타/미등재 폴더 (<span id="countUnreg">0</span>)
+          </button>
+          <button type="button" class="subfilter-btn" id="filterAll" onclick="setAppFilter('all')">
+            전체 보기
+          </button>
+        </div>
+
         <select id="appSelect" onchange="onAppSelectChange()">
           <option value="">앱 폴더 목록을 불러오는 중...</option>
         </select>
@@ -568,24 +608,85 @@
       showToast(`음성 인식 언어가 [${sttLang}]로 변경되었습니다.`);
     }
 
+    let allAppsData = [];
+    let currentAppFilter = 'kwboard';
+
+    function setAppFilter(filter) {
+      currentAppFilter = filter;
+      document.getElementById('filterKwboard').classList.toggle('active', filter === 'kwboard');
+      document.getElementById('filterUnregistered').classList.toggle('active', filter === 'unregistered');
+      document.getElementById('filterAll').classList.toggle('active', filter === 'all');
+      renderAppSelect();
+    }
+
+    function renderAppSelect() {
+      const select = document.getElementById('appSelect');
+      select.innerHTML = '';
+
+      const kwboardApps = allAppsData.filter(a => a.isRegisteredInKwboard);
+      const unregApps = allAppsData.filter(a => !a.isRegisteredInKwboard);
+
+      document.getElementById('countKwboard').innerText = kwboardApps.length;
+      document.getElementById('countUnreg').innerText = unregApps.length;
+
+      if (currentAppFilter === 'kwboard') {
+        document.getElementById('appCount').innerText = `등재 앱 ${kwboardApps.length}개 표시 중`;
+        kwboardApps.forEach(app => {
+          const opt = document.createElement('option');
+          opt.value = app.path;
+          const techBadge = app.hasPackageJson ? '📦' : app.hasGit ? '🌿' : '📁';
+          opt.innerText = `⭐ ${app.name} (${techBadge} ${app.category})`;
+          select.appendChild(opt);
+        });
+      } else if (currentAppFilter === 'unregistered') {
+        document.getElementById('appCount').innerText = `미등재 폴더 ${unregApps.length}개 표시 중`;
+        unregApps.forEach(app => {
+          const opt = document.createElement('option');
+          opt.value = app.path;
+          const techBadge = app.hasPackageJson ? '📦' : app.hasGit ? '🌿' : '📁';
+          opt.innerText = `⚪ ${app.name} (${techBadge} ${app.category})`;
+          select.appendChild(opt);
+        });
+      } else {
+        // All with optgroups
+        document.getElementById('appCount').innerText = `전체 ${allAppsData.length}개`;
+
+        if (kwboardApps.length > 0) {
+          const groupKw = document.createElement('optgroup');
+          groupKw.label = `⭐ [KW보드 등재 앱] (${kwboardApps.length}개)`;
+          kwboardApps.forEach(app => {
+            const opt = document.createElement('option');
+            opt.value = app.path;
+            const techBadge = app.hasPackageJson ? '📦' : app.hasGit ? '🌿' : '📁';
+            opt.innerText = `⭐ ${app.name} (${techBadge})`;
+            groupKw.appendChild(opt);
+          });
+          select.appendChild(groupKw);
+        }
+
+        if (unregApps.length > 0) {
+          const groupUnreg = document.createElement('optgroup');
+          groupUnreg.label = `⚪ [기타 / 미등재 폴더] (${unregApps.length}개)`;
+          unregApps.forEach(app => {
+            const opt = document.createElement('option');
+            opt.value = app.path;
+            const techBadge = app.hasPackageJson ? '📦' : app.hasGit ? '🌿' : '📁';
+            opt.innerText = `⚪ ${app.name} (${techBadge})`;
+            groupUnreg.appendChild(opt);
+          });
+          select.appendChild(groupUnreg);
+        }
+      }
+    }
+
     // Load Apps List
     async function loadApps() {
       try {
         const res = await fetch(`${API_BASE}/apps`);
         const data = await res.json();
         if (data.ok) {
-          const select = document.getElementById('appSelect');
-          select.innerHTML = '';
-          document.getElementById('appCount').innerText = `총 ${data.apps.length}개 발견`;
-          
-          data.apps.forEach(app => {
-            const opt = document.createElement('option');
-            opt.value = app.path;
-            const kwBadge = app.isRegisteredInKwboard ? '⭐[KW보드]' : '⚪[미등재]';
-            const techBadge = app.hasPackageJson ? '📦' : app.hasGit ? '🌿' : '📁';
-            opt.innerText = `${kwBadge} ${techBadge} ${app.name} (${app.category})`;
-            select.appendChild(opt);
-          });
+          allAppsData = data.apps || [];
+          renderAppSelect();
         }
       } catch (e) {
         document.getElementById('appCount').innerText = '목록 로드 실패';

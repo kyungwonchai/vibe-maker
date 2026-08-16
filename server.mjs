@@ -65,16 +65,30 @@ const handleApps = (req, res) => {
     const results = [];
     const seenPaths = new Set();
 
-    // Load services.json to determine kwboard registration
+    // Load services.json & portal/apps.json to determine kwboard registration
     const registeredIds = new Set();
     try {
       const servicesRaw = JSON.parse(readFileSync('/home/kw/kwsoft/dashboard/services.json', 'utf8'));
       const sList = Array.isArray(servicesRaw) ? servicesRaw : (servicesRaw.services || []);
-      sList.forEach(s => registeredIds.add(s.id));
-      // kwboard itself is the core dashboard
-      registeredIds.add('dashboard');
-      registeredIds.add('kwboard');
+      sList.forEach(s => {
+        if (s.id) registeredIds.add(s.id);
+        if (s.name) registeredIds.add(s.name);
+        if (s.path) registeredIds.add(path.basename(s.path));
+      });
     } catch {}
+
+    try {
+      const portalRaw = JSON.parse(readFileSync('/home/kw/kwsoft/dashboard/portal/apps.json', 'utf8'));
+      if (portalRaw && Array.isArray(portalRaw.apps)) {
+        portalRaw.apps.forEach(a => {
+          if (a.id) registeredIds.add(a.id);
+          if (a.name) registeredIds.add(a.name);
+        });
+      }
+    } catch {}
+
+    registeredIds.add('dashboard');
+    registeredIds.add('kwboard');
 
     // 1) Scan /home/kw/kwsoft
     const kwsoftDir = '/home/kw/kwsoft';
@@ -87,7 +101,7 @@ const handleApps = (req, res) => {
           const hasGit = existsSync(path.join(fullPath, '.git'));
           const hasPackageJson = existsSync(path.join(fullPath, 'package.json'));
           const hasManage = existsSync(path.join(fullPath, 'manage.sh'));
-          const isKwboard = registeredIds.has(e.name) || e.name === 'dashboard';
+          const isKwboard = registeredIds.has(e.name) || registeredIds.has(path.basename(fullPath));
           results.push({
             name: e.name,
             path: fullPath,
