@@ -1,5 +1,16 @@
 [
   {
+    "id": "vibe_1786894524194_zs6w",
+    "timestamp": 1786894524195,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/youtubekw",
+    "targetName": "youtubekw",
+    "prompt": "오픽1급 노하우영상도 수집히게 버튼추가",
+    "sessionName": "agy-vibe-youtubekw-3769",
+    "logFile": "agy-vibe-youtubekw-3769.log",
+    "status": "started"
+  },
+  {
     "id": "vibe_1786893823739_4n6u",
     "timestamp": 1786893823739,
     "mode": "modify",

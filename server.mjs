@@ -250,23 +250,22 @@ const handleExecute = async (req, res) => {
       execSync(`tmux kill-session -t ${cleanSessionName} 2>/dev/null || true`, { env: ENV });
     } catch {}
 
+    // 1) Create new tmux session in target directory
     execFileSync('tmux', ['new-session', '-d', '-s', cleanSessionName, '-c', targetDir], { env: ENV });
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => setTimeout(r, 500));
 
-    const exitCmd = autoClose ? ' && tmux kill-session -t ' + cleanSessionName : '';
-    const escapedPrompt = prompt.replace(/'/g, "'\\''");
+    // 2) Launch agy in YOLO mode
+    const launchAgyCmd = `${AGY_BIN} --dangerously-skip-permissions`;
+    execFileSync('tmux', ['send-keys', '-t', cleanSessionName, launchAgyCmd, 'Enter'], { env: ENV });
 
-    // Log file path for this specific run
-    const logFilePath = path.join(LOGS_DIR, `${cleanSessionName}.log`);
-
-    // Standard auto git commit + push and registration script
-    const autoGitCmd = `(git init 2>/dev/null; git add -A; git commit -m "Auto update via agy" 2>/dev/null; gh repo create kyungwonchai/${targetName} --public --source=. --remote=origin --push 2>/dev/null || git push origin main 2>/dev/null || true)`;
-    const autoRegCmd = `(node /home/kw/kwsoft/vibe-maker/scripts/auto-register.mjs "${targetName}" 10148 "🚀" "${targetName} 앱" 2>/dev/null || true)`;
-
-    // Run agy with non-interactive auto-approval flags and persistent pipe to log file
-    const fullCmd = `(${AGY_BIN} --dangerously-skip-permissions -p '${escapedPrompt}' 2>&1 && ${autoGitCmd} 2>&1 && ${autoRegCmd} 2>&1) | tee -a "${logFilePath}"${exitCmd}`;
-
-    execFileSync('tmux', ['send-keys', '-t', cleanSessionName, fullCmd, 'Enter'], { env: ENV });
+    // 3) Wait for agy terminal interface to be ready, then type prompt and press Enter
+    setTimeout(async () => {
+      try {
+        execFileSync('tmux', ['send-keys', '-t', cleanSessionName, prompt, 'Enter'], { env: ENV });
+      } catch (err) {
+        console.error('Failed to send prompt to agy session:', err);
+      }
+    }, 1800);
 
     saveHistory({
       mode,
@@ -280,7 +279,7 @@ const handleExecute = async (req, res) => {
 
     res.json({
       ok: true,
-      message: `⚡ [${targetName}]에 대해 agy 자동 작업이 시작되었습니다.`,
+      message: `⚡ [${targetName}] agy 세션을 열고 프롬프트를 순차 입력했습니다.`,
       sessionName: cleanSessionName,
       targetDir,
     });
