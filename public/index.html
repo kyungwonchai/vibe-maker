@@ -589,8 +589,24 @@
   </div>
 
   <script>
-    // Determine API Base dynamically: when accessed via Nginx /vibe-maker/, proxy_pass strips to /, so /api is used.
-    const API_BASE = '/api';
+    // Universal API fetch helper (handles both /api and /vibe-maker/api regardless of reverse proxy prefix)
+    async function apiFetch(endpoint, options = {}) {
+      const urls = [
+        endpoint.startsWith('/') ? endpoint : `/${endpoint}`,
+        `/vibe-maker${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
+      ];
+      for (const url of urls) {
+        try {
+          const res = await fetch(url, options);
+          const ct = res.headers.get('content-type') || '';
+          if (res.ok && ct.includes('application/json')) {
+            return await res.json();
+          }
+        } catch {}
+      }
+      throw new Error('API 요청 실패 (' + endpoint + ')');
+    }
+
     let currentMode = 'modify';
     let isRecording = false;
     let sttLang = 'ko-KR';
@@ -705,8 +721,7 @@
     // Load Apps List
     async function loadApps() {
       try {
-        const res = await fetch(`${API_BASE}/apps`);
-        const data = await res.json();
+        const data = await apiFetch('/api/apps');
         if (data.ok) {
           allAppsData = data.apps || [];
           renderAppSelect();
@@ -825,16 +840,16 @@
       };
 
       try {
-        const res = await fetch(`${API_BASE}/execute`, {
+        const data = await apiFetch('/api/execute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const data = await res.json();
         if (data.ok) {
           showToast(data.message, '🚀');
           currentSessionName = data.sessionName;
           document.getElementById('sessionStatusBadge').innerText = 'agy 실행 중';
+          setTimeout(loadHistoryList, 1000);
         } else {
           showToast('오류: ' + data.error, '❌');
         }
@@ -853,12 +868,11 @@
         return;
       }
       try {
-        const res = await fetch(`${API_BASE}/session-action`, {
+        const data = await apiFetch('/api/session-action', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ session: currentSessionName, action }),
         });
-        const data = await res.json();
         showToast(data.message || '완료', '✅');
       } catch (e) {
         showToast('실패: ' + e.message, '❌');
@@ -868,8 +882,7 @@
     // Setup Live Terminal Screen Monitor (WebSocket + HTTP Polling Fallback)
     async function updateScreenHttp() {
       try {
-        const res = await fetch(`${API_BASE}/screen-live`);
-        const data = await res.json();
+        const data = await apiFetch('/api/screen-live');
         if (data.ok && data.active) {
           const screen = document.getElementById('terminalScreen');
           screen.innerText = data.output || '(실행 중...)';
@@ -918,8 +931,7 @@
     async function loadHistoryList() {
       const container = document.getElementById('historyContainer');
       try {
-        const res = await fetch(`${API_BASE}/history`);
-        const data = await res.json();
+        const data = await apiFetch('/api/history');
         if (data.ok && Array.isArray(data.history) && data.history.length > 0) {
           container.innerHTML = '';
           data.history.forEach(item => {
@@ -962,8 +974,7 @@
       body.innerText = '로그 파일을 읽어오는 중...';
 
       try {
-        const res = await fetch(`${API_BASE}/history-log/${historyId}`);
-        const data = await res.json();
+        const data = await apiFetch(`/api/history-log/${historyId}`);
         if (data.ok) {
           const item = data.item;
           const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR') : '';
