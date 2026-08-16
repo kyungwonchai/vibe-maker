@@ -589,8 +589,8 @@
   </div>
 
   <script>
-    // Determine API Base dynamically whether under /vibe-maker/ or root
-    const API_BASE = window.location.pathname.startsWith('/vibe-maker') ? '/vibe-maker/api' : '/api';
+    // Determine API Base dynamically: when accessed via Nginx /vibe-maker/, proxy_pass strips to /, so /api is used.
+    const API_BASE = '/api';
     let currentMode = 'modify';
     let isRecording = false;
     let sttLang = 'ko-KR';
@@ -865,7 +865,21 @@
       }
     }
 
-    // Setup Live WebSocket Log Stream
+    // Setup Live Terminal Screen Monitor (WebSocket + HTTP Polling Fallback)
+    async function updateScreenHttp() {
+      try {
+        const res = await fetch(`${API_BASE}/screen-live`);
+        const data = await res.json();
+        if (data.ok && data.active) {
+          const screen = document.getElementById('terminalScreen');
+          screen.innerText = data.output || '(실행 중...)';
+          screen.scrollTop = screen.scrollHeight;
+          document.getElementById('sessionStatusBadge').innerText = 'agy 작업 중';
+          currentSessionName = data.session;
+        }
+      } catch {}
+    }
+
     function setupWebSocket() {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${proto}//${window.location.host}/vibe-maker/`;
@@ -895,6 +909,9 @@
       } catch (e) {
         console.warn('WS error:', e);
       }
+
+      // Always poll HTTP every 2 seconds as robust fallback
+      setInterval(updateScreenHttp, 2000);
     }
 
     // Load & Render Command History (30 Days)
@@ -945,7 +962,7 @@
       body.innerText = '로그 파일을 읽어오는 중...';
 
       try {
-        const res = await fetch(`${API_BASE}/history/${historyId}/log`);
+        const res = await fetch(`${API_BASE}/history-log/${historyId}`);
         const data = await res.json();
         if (data.ok) {
           const item = data.item;

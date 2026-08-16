@@ -20,10 +20,6 @@ const HISTORY_FILE = path.join(__dirname, 'vibe-history.json');
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 
-// Serve static frontend files for both root and /vibe-maker subpath
-app.use('/', express.static(path.join(__dirname, 'public')));
-app.use('/vibe-maker', express.static(path.join(__dirname, 'public')));
-
 // Set up Environment for agy CLI
 const ENV = {
   ...process.env,
@@ -84,7 +80,7 @@ function updateHistoryStatus(sessionName, status, logExcerpt) {
   } catch {}
 }
 
-// 1. App / Folder Scan API (both /api/apps and /vibe-maker/api/apps)
+// 1. App / Folder Scan API
 const handleApps = (req, res) => {
   try {
     const results = [];
@@ -350,38 +346,59 @@ const handleHistoryLog = (req, res) => {
 
   res.json({ ok: true, item, logContent });
 };
-app.get('/api/history/:id/log', handleHistoryLog);
-app.get('/vibe-maker/api/history/:id/log', handleHistoryLog);
+app.get('/api/history-log/:id', handleHistoryLog);
+app.get('/vibe-maker/api/history-log/:id', handleHistoryLog);
 
-// Fallback SPA routing
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
+// 6. Direct Screen / Tmux Realtime Status API
+const handleScreenLive = (req, res) => {
+  const sessions = getActiveSessions();
+  if (sessions.length === 0) {
+    return res.json({ ok: true, active: false, output: '(현재 백그라운드에서 실행 중인 agy 세션이 없습니다.)' });
+  }
+  try {
+    const output = execFileSync('tmux', ['capture-pane', '-pt', sessions[0], '-S', '-100'], {
+      env: ENV,
+      encoding: 'utf8',
+      timeout: 2000,
+    }).trimEnd();
+    res.json({ ok: true, active: true, session: sessions[0], output });
+  } catch (e) {
+    res.json({ ok: false, error: e.message });
+  }
+};
+app.get('/api/screen-live', handleScreenLive);
+app.get('/vibe-maker/api/screen-live', handleScreenLive);
+
+// 7. Serve static frontend files
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
-// WebSocket live terminal log stream
-wss.on('connection', (ws, req) => {
+wss.on("connection", (ws, req) => {
   let timer = setInterval(() => {
     try {
       const sessions = getActiveSessions();
       if (sessions.length === 0) {
-        ws.send(JSON.stringify({ type: 'status', text: '(현재 실행 중인 바이브 코딩 agy 세션이 없습니다.)', sessions: [] }));
+        ws.send(JSON.stringify({ type: "status", text: "(현재 실행 중인 바이브 코딩 agy 세션이 없습니다.)", sessions: [] }));
         return;
       }
       const target = sessions[0];
-      const pane = execFileSync('tmux', ['capture-pane', '-pt', target, '-S', '-60'], {
+      const pane = execFileSync("tmux", ["capture-pane", "-pt", target, "-S", "-60"], {
         env: ENV,
-        encoding: 'utf8',
+        encoding: "utf8",
         timeout: 2000,
       }).trimEnd();
-      ws.send(JSON.stringify({ type: 'stream', session: target, text: pane, sessions }));
+      ws.send(JSON.stringify({ type: "stream", session: target, text: pane, sessions }));
     } catch {}
   }, 1500);
 
-  ws.on('close', () => {
+  ws.on("close", () => {
     clearInterval(timer);
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`🎨 Vibe Maker (바이브 제작/수정) 서버 실행 중: http://127.0.0.1:${PORT}`);
 });
