@@ -697,90 +697,89 @@
       // Optional: prefill prompt or title
     }
 
-    let sessionText = '';
-
-    // Setup Web Speech Recognition (STT) - VoiceGit Style (No Duplication)
-    function setupSTT() {
-      const SpeechClass = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechClass) return;
-
-      recognition = new SpeechClass();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = sttLang;
-
-      recognition.onresult = (event) => {
-        let currentSession = '';
-        for (let i = 0; i < event.results.length; ++i) {
-          currentSession += event.results[i][0].transcript + (event.results[i].isFinal ? ' ' : '');
-        }
-        sessionText = currentSession;
-
-        const preview = document.getElementById('interimPreview');
-        if (sessionText) {
-          preview.style.display = 'block';
-          preview.innerText = '🎙️ 인식 중: ' + sessionText;
-        } else {
-          preview.style.display = 'none';
-        }
-      };
-
-      recognition.onerror = (e) => {
-        console.warn('STT error:', e.error);
-        stopRecording();
-      };
-
-      recognition.onend = () => {
-        if (isRecording) {
-          stopRecording();
-        }
-      };
-    }
+    let recognitionInstance = null;
+    let currentSessionTranscript = '';
 
     function toggleRecording() {
       if (isRecording) {
-        stopRecording();
-      } else {
-        startRecording();
-      }
-    }
+        // Stop recording like VoiceGit
+        if (recognitionInstance) {
+          try { recognitionInstance.stop(); } catch {}
+        }
+        isRecording = false;
+        document.getElementById('btnMic').classList.remove('recording');
+        document.getElementById('micLabel').innerText = '마이크 음성 인식 시작';
+        document.getElementById('micIcon').innerText = '🎤';
+        document.getElementById('interimPreview').style.display = 'none';
 
-    function startRecording() {
-      if (!recognition) {
-        showToast('이 브라우저는 음성 인식을 지원하지 않습니다.', '⚠️');
-        return;
-      }
-      try {
-        sessionText = '';
-        recognition.lang = sttLang;
-        recognition.start();
-        isRecording = true;
-        document.getElementById('btnMic').classList.add('recording');
-        document.getElementById('micLabel').innerText = '녹음 중 (터치하여 완료)';
-        document.getElementById('micIcon').innerText = '⏹️';
-        document.getElementById('interimPreview').style.display = 'block';
-        document.getElementById('interimPreview').innerText = '🎙️ 마이크에 말씀하세요...';
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    function stopRecording() {
-      isRecording = false;
-      document.getElementById('btnMic').classList.remove('recording');
-      document.getElementById('micLabel').innerText = '마이크 음성 인식 시작';
-      document.getElementById('micIcon').innerText = '🎤';
-      document.getElementById('interimPreview').style.display = 'none';
-
-      // Append finalized speech text exactly once
-      if (sessionText.trim()) {
+        // Append final transcript
         const input = document.getElementById('promptInput');
-        const prev = input.value.trim();
-        input.value = prev ? `${prev} ${sessionText.trim()}` : sessionText.trim();
-        sessionText = '';
-      }
+        const prev = input.value;
+        const add = currentSessionTranscript.trim();
+        if (add) {
+          input.value = prev ? (prev + (prev.endsWith('\n') ? '' : ' ') + add) : add;
+        }
+        currentSessionTranscript = '';
+        showToast('녹음이 완료되어 텍스트에 반영되었습니다.', '✅');
+      } else {
+        // Start recording like VoiceGit
+        const SpeechClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechClass) {
+          showToast('이 브라우저는 음성 인식을 지원하지 않습니다.', '⚠️');
+          return;
+        }
 
-      try { recognition && recognition.stop(); } catch {}
+        currentSessionTranscript = '';
+        const rec = new SpeechClass();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = sttLang;
+
+        rec.onresult = (event) => {
+          let current = '';
+          for (let i = 0; i < event.results.length; ++i) {
+            current += event.results[i][0].transcript + (event.results[i].isFinal ? ' ' : '');
+          }
+          currentSessionTranscript = current;
+          const preview = document.getElementById('interimPreview');
+          if (current) {
+            preview.style.display = 'block';
+            preview.innerText = '🎙️ 인식 중: ' + current;
+          }
+        };
+
+        rec.onerror = (event) => {
+          console.error('Speech recognition error', event.error);
+          isRecording = false;
+          document.getElementById('btnMic').classList.remove('recording');
+          document.getElementById('micLabel').innerText = '마이크 음성 인식 시작';
+          document.getElementById('micIcon').innerText = '🎤';
+          document.getElementById('interimPreview').style.display = 'none';
+          showToast('음성 인식 오류: ' + event.error, '❌');
+        };
+
+        rec.onend = () => {
+          if (isRecording) {
+            // Auto restart if stopped unexpectedly while active
+            try { rec.start(); } catch {}
+          }
+        };
+
+        try {
+          rec.start();
+          recognitionInstance = rec;
+          isRecording = true;
+          document.getElementById('btnMic').classList.add('recording');
+          document.getElementById('micLabel').innerText = '녹음 중... (말씀 후 터치하여 완료)';
+          document.getElementById('micIcon').innerText = '⏹️';
+          document.getElementById('interimPreview').style.display = 'block';
+          document.getElementById('interimPreview').innerText = '🎙️ 마이크에 편하게 말씀하세요...';
+          showToast('음성 인식을 시작합니다.', '🎙️');
+        } catch (e) {
+          console.error('Start error:', e);
+          showToast('마이크 시작 실패: ' + e.message, '❌');
+        }
+      }
     }
 
     // Execute Vibe Maker
@@ -877,7 +876,6 @@
 
     window.onload = () => {
       loadApps();
-      setupSTT();
       setupWebSocket();
     };
   </script>
