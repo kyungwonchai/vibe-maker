@@ -549,7 +549,7 @@
     <div class="terminal-card">
       <div class="terminal-header">
         <div class="terminal-title">
-          <span>💻 터미널 실시간 모니터링</span>
+          <span>💻 실시간 터미널 모니터링</span>
         </div>
         <div class="terminal-actions">
           <button class="action-pill" onclick="sendAction('ctrl-c')">⏹️ 중단(Ctrl+C)</button>
@@ -557,6 +557,29 @@
         </div>
       </div>
       <pre class="terminal-screen" id="terminalScreen">(실행 중인 agy 로그가 여기에 실시간으로 표시됩니다...)</pre>
+    </div>
+
+    <!-- Recent Command & Execution Log History (30 Days Retention) -->
+    <div class="card" style="margin-top: 8px;">
+      <div class="card-title" style="justify-content: space-between;">
+        <span>📜 최근 명령 & 실행 로그 내역 (30일 보관)</span>
+        <button class="action-pill" onclick="loadHistoryList()">🔄 새로고침</button>
+      </div>
+      <div id="historyContainer" class="history-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto;">
+        <div style="color: #64748b; font-size: 0.85rem; text-align: center; padding: 12px;">이력을 불러오는 중...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Detail Modal -->
+  <div id="logModal" class="modal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
+    <div style="background: #0f172a; border: 1px solid #334155; border-radius: 12px; width: 100%; max-width: 680px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <div style="padding: 14px 16px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; background: #131b2e;">
+        <div style="font-weight: 700; color: #f1f5f9; font-size: 0.92rem;" id="modalLogTitle">📜 실행 로그 상세</div>
+        <button onclick="closeLogModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+      <div style="padding: 12px 16px; background: #080c14; border-bottom: 1px solid #1e293b; font-size: 0.8rem; color: #94a3b8;" id="modalLogMeta"></div>
+      <pre style="margin: 0; padding: 14px; background: #060911; color: #38bdf8; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; line-height: 1.45; overflow-y: auto; flex: 1; white-space: pre-wrap; word-break: break-all;" id="modalLogBody">로그를 불러오는 중...</pre>
     </div>
   </div>
 
@@ -874,8 +897,76 @@
       }
     }
 
+    // Load & Render Command History (30 Days)
+    async function loadHistoryList() {
+      const container = document.getElementById('historyContainer');
+      try {
+        const res = await fetch(`${API_BASE}/history`);
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.history) && data.history.length > 0) {
+          container.innerHTML = '';
+          data.history.forEach(item => {
+            const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+            const card = document.createElement('div');
+            card.style.cssText = 'background: #0b1120; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;';
+
+            const modeBadge = item.mode === 'create' ? '✨ 신규제작' : '🛠️ 기존수정';
+            const target = item.targetName || '앱';
+            
+            card.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="background: rgba(59,130,246,0.15); color: #60a5fa; font-size: 0.72rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;">${modeBadge}</span>
+                  <span style="font-weight: 700; color: #f8fafc; font-size: 0.88rem;">${target}</span>
+                </div>
+                <span style="color: #64748b; font-size: 0.75rem;">${dateStr}</span>
+              </div>
+              <div style="color: #cbd5e1; font-size: 0.82rem; background: #070b14; padding: 8px 10px; border-radius: 6px; border-left: 3px solid #3b82f6; white-space: pre-wrap; word-break: break-all;">${item.prompt || '(명령어 없음)'}</div>
+              <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 2px;">
+                <button class="action-pill" onclick="openLogModal('${item.id}')" style="background: #1e293b; color: #38bdf8; border-color: #334155;">📄 전체 실행 로그 보기</button>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = '<div style="color: #64748b; font-size: 0.85rem; text-align: center; padding: 12px;">최근 30일간 실행된 명령 이력이 없습니다.</div>';
+        }
+      } catch (e) {
+        container.innerHTML = '<div style="color: #ef4444; font-size: 0.85rem; text-align: center; padding: 12px;">이력 로드 실패</div>';
+      }
+    }
+
+    // Open & View Log Modal
+    async function openLogModal(historyId) {
+      const modal = document.getElementById('logModal');
+      const body = document.getElementById('modalLogBody');
+      const meta = document.getElementById('modalLogMeta');
+      modal.style.display = 'flex';
+      body.innerText = '로그 파일을 읽어오는 중...';
+
+      try {
+        const res = await fetch(`${API_BASE}/history/${historyId}/log`);
+        const data = await res.json();
+        if (data.ok) {
+          const item = data.item;
+          const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR') : '';
+          meta.innerHTML = `<strong>대상:</strong> ${item.targetName} (${item.targetDir}) | <strong>시각:</strong> ${dateStr}<br><strong>명령:</strong> ${item.prompt}`;
+          body.innerText = data.logContent || '(로그 내용이 비어있습니다.)';
+        } else {
+          body.innerText = '오류: ' + data.error;
+        }
+      } catch (e) {
+        body.innerText = '로그 조회 실패: ' + e.message;
+      }
+    }
+
+    function closeLogModal() {
+      document.getElementById('logModal').style.display = 'none';
+    }
+
     window.onload = () => {
       loadApps();
+      loadHistoryList();
       setupWebSocket();
     };
   </script>

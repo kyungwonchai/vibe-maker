@@ -34,11 +34,23 @@ const ENV = {
 };
 const AGY_BIN = existsSync('/home/kw/.local/bin/agy') ? '/home/kw/.local/bin/agy' : 'agy';
 
+const LOGS_DIR = path.join(__dirname, 'logs');
+if (!existsSync(LOGS_DIR)) {
+  mkdirSync(LOGS_DIR, { recursive: true });
+}
+
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 function loadHistory() {
   if (!existsSync(HISTORY_FILE)) return [];
   try {
     const data = JSON.parse(readFileSync(HISTORY_FILE, 'utf8'));
-    return Array.isArray(data) ? data : [];
+    const now = Date.now();
+    // Keep logs within 30 days
+    const valid = (Array.isArray(data) ? data : []).filter(item => {
+      return (now - (item.timestamp || 0)) <= THIRTY_DAYS_MS;
+    });
+    return valid;
   } catch {
     return [];
   }
@@ -52,11 +64,24 @@ function saveHistory(item) {
       timestamp: Date.now(),
       ...item,
     });
-    const trimmed = list.slice(0, 50);
-    writeFileSync(HISTORY_FILE, JSON.stringify(trimmed, null, 2), 'utf8');
+    // Write back 30-day filtered history
+    writeFileSync(HISTORY_FILE, JSON.stringify(list, null, 2), 'utf8');
   } catch (e) {
     console.error('History save error:', e.message);
   }
+}
+
+function updateHistoryStatus(sessionName, status, logExcerpt) {
+  try {
+    const list = loadHistory();
+    const item = list.find(h => h.sessionName === sessionName);
+    if (item) {
+      item.status = status;
+      item.finishedAt = Date.now();
+      if (logExcerpt) item.logExcerpt = logExcerpt;
+      writeFileSync(HISTORY_FILE, JSON.stringify(list, null, 2), 'utf8');
+    }
+  } catch {}
 }
 
 // 1. App / Folder Scan API (both /api/apps and /vibe-maker/api/apps)
@@ -235,12 +260,15 @@ const handleExecute = async (req, res) => {
     const exitCmd = autoClose ? ' && tmux kill-session -t ' + cleanSessionName : '';
     const escapedPrompt = prompt.replace(/'/g, "'\\''");
 
+    // Log file path for this specific run
+    const logFilePath = path.join(LOGS_DIR, `${cleanSessionName}.log`);
+
     // Standard auto git commit + push and registration script
     const autoGitCmd = `(git init 2>/dev/null; git add -A; git commit -m "Auto update via agy" 2>/dev/null; gh repo create kyungwonchai/${targetName} --public --source=. --remote=origin --push 2>/dev/null || git push origin main 2>/dev/null || true)`;
     const autoRegCmd = `(node /home/kw/kwsoft/vibe-maker/scripts/auto-register.mjs "${targetName}" 10148 "🚀" "${targetName} 앱" 2>/dev/null || true)`;
 
-    // Run agy with non-interactive auto-approval flags
-    const fullCmd = `${AGY_BIN} --dangerously-skip-permissions -p '${escapedPrompt}' && ${autoGitCmd} && ${autoRegCmd}${exitCmd}`;
+    // Run agy with non-interactive auto-approval flags and persistent pipe to log file
+    const fullCmd = `(${AGY_BIN} --dangerously-skip-permissions -p '${escapedPrompt}' 2>&1 && ${autoGitCmd} 2>&1 && ${autoRegCmd} 2>&1) | tee -a "${logFilePath}"${exitCmd}`;
 
     execFileSync('tmux', ['send-keys', '-t', cleanSessionName, fullCmd, 'Enter'], { env: ENV });
 
@@ -250,6 +278,7 @@ const handleExecute = async (req, res) => {
       targetName,
       prompt,
       sessionName: cleanSessionName,
+      logFile: `${cleanSessionName}.log`,
       status: 'started',
     });
 
@@ -287,12 +316,42 @@ const handleSessionAction = (req, res) => {
 app.post('/api/session-action', handleSessionAction);
 app.post('/vibe-maker/api/session-action', handleSessionAction);
 
-// 5. History API
+// 5. History API (30-day Retention & Log Viewer)
 const handleHistory = (req, res) => {
   res.json({ ok: true, history: loadHistory() });
 };
 app.get('/api/history', handleHistory);
 app.get('/vibe-maker/api/history', handleHistory);
+
+const handleHistoryLog = (req, res) => {
+  const { id } = req.params;
+  const list = loadHistory();
+  const item = list.find(h => h.id === id || h.sessionName === id);
+  if (!item) {
+    return res.status(404).json({ ok: false, error: '기록을 찾을 수 없습니다.' });
+  }
+
+  let logContent = '';
+  const logFile = item.logFile ? path.join(LOGS_DIR, item.logFile) : null;
+  if (logFile && existsSync(logFile)) {
+    logContent = readFileSync(logFile, 'utf8');
+  } else {
+    // If still in active tmux
+    try {
+      logContent = execFileSync('tmux', ['capture-pane', '-pt', item.sessionName, '-S', '-300'], {
+        env: ENV,
+        encoding: 'utf8',
+        timeout: 2000,
+      }).trimEnd();
+    } catch {
+      logContent = '(보관된 상세 로그가 없습니다.)';
+    }
+  }
+
+  res.json({ ok: true, item, logContent });
+};
+app.get('/api/history/:id/log', handleHistoryLog);
+app.get('/vibe-maker/api/history/:id/log', handleHistoryLog);
 
 // Fallback SPA routing
 app.get('*', (req, res) => {
