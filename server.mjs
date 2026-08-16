@@ -154,9 +154,14 @@ app.get('/vibe-maker/api/apps', handleApps);
 // 2. Active Session Status API
 function getActiveSessions() {
   try {
-    const out = execSync("tmux list-sessions -F '#{session_name}' 2>/dev/null", { env: ENV, encoding: 'utf8' });
-    const lines = out.split('\n').map(s => s.trim()).filter(Boolean);
-    return lines.filter(s => s.startsWith(SESSION_PREFIX) || s === 'agy');
+    const out = execSync("tmux list-sessions -F '#{session_name} #{session_created}' 2>/dev/null", { env: ENV, encoding: 'utf8' });
+    const list = out.split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+      const parts = line.split(' ');
+      return { name: parts[0], created: parseInt(parts[1] || '0', 10) };
+    });
+    // Sort by newest created first
+    list.sort((a, b) => b.created - a.created);
+    return list.map(item => item.name).filter(s => s.startsWith(SESSION_PREFIX) || s === 'agy');
   } catch {
     return [];
   }
