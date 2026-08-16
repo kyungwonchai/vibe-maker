@@ -1,0 +1,52 @@
+**OPIc 1급(AL · Advanced Low) 만점 공략 노하우 센터**가 추가되었습니다.
+
+### 🌟 추가된 주요 내용 및 기능
+
+1. **1급(AL) 평가 기준 4대 핵심 축**
+   - **문단 단위 발화 (Paragraph Length)**: 단순 단문 나열을 넘어 접속사/분사구문을 활용한 유기적 문단 확장
+   - **철저한 과거 시제 유지 (Tense Consistency)**: Past Simple(-ed) + Past Continuous(was ~ing) + Past Perfect(had p.p.) 3단 시제 일치
+   - **돌발/문제상황 해결력 (Complication Resolution)**: 롤플레이 12번에서 사과 ➔ 상황설명 ➔ 현실적 대안(Option A & B) 제시 구조
+   - **추상적 사회 이슈 & 트렌드 통찰**: 14~15번 Past vs Present 비교 및 양날의 검(Double-edged sword) 거시적 견해 전개
+
+2. **AL 달성 8대 절대 원칙 (The 8 Golden Rules)**
+   - 두괄식 Main Point + Feeling 먼저 꽂기
+   - 과거 경험 기승전결(Plot Structure) 스토리텔링
+   - Dead Air(침묵) 0.5초도 허용하지 않는 핑계 기술
+   - 구체적 디테일(숫자, 감각, 시간, 날씨) 추가
+   - 11~13번 롤플레이 콤보 및 14~15번 고난도 어드밴스 공략 공식
+   - 문항당 1분 30초~1분 50초 황금 시간 배분법
+
+3. **원어민 필러 & 커넥터 50선 (TTS 음성 듣기 & 복사 지원)**
+   - 생각 정리 & 버퍼링 멘트 (*"Well, to be completely honest with you, Eva..."*)
+   - 감정 및 인상 강조 (*"It completely blew my mind!"*, *"hands down the best"*)
+   - 과거 회상 & 시제 전환 (*"Looking back on it now..."*, *"Back in the day..."*)
+   - 화제 전환 및 문단 확장용 연결구
+
+4. **IH(2급) vs AL(1급) 실전 스크립트 Before & After 비교**
+   - 여행 경험 / 집에서의 돌발 문제 / 테크 트렌드 변화에 대한 2급 vs 1급 답변 음성 비교 및 평가 포인트 분석
+
+5. **서베이(Survey) 최적화 꿀조합**
+   - 돌발 최소화 (일 경험 없음, 비학생, 단독 거주) & 답변 100% 호환 12개 서베이 세팅법
+
+---
+
+### 📍 적용 위치
+- **[OPIc 연습]** ➔ 상단 탭의 **`🏆 1급(AL) 노하우`**
+- **[OPIc 답변 마스터]** ➔ 상단 탭의 **`🏆 1급(AL) 만점 전략`**
+- 변경사항 빌드 및 GitHub Push가 완료되었습니다.
+Reinitialized existing Git repository in /home/kw/kwsoft/youtubekw/.git/
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+🚀 [Auto-Register] Registering youtubekw on port 10148...
+▶ 설정 생성
+  /home/kw/kwserver/nginx/kwopi.duckdns.org.conf  (앱 26개)
+  /home/kw/kwserver/nginx/sy0519.duckdns.org.conf  (앱 2개)
+  /home/kw/kwserver/nginx/mj1210.duckdns.org.conf  (앱 0개)
+▶ 클라이언트 인증서 신뢰 목록 갱신
+▶ 백업
+▶ 반영
+✅ 반영 완료 (백업: /var/backups/kw-nginx/20260817_004116)
+✅ Nginx reloaded successfully via kw-apply-sites

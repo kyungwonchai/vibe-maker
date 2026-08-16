@@ -1,5 +1,27 @@
 [
   {
+    "id": "vibe_1786894912298_vmqr",
+    "timestamp": 1786894912298,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/youtubekw",
+    "targetName": "youtubekw",
+    "prompt": "README.md 파일 상단에 Vibe Maker 자동 테스트 성공 문구 1줄 추가",
+    "sessionName": "agy-vibe-youtubekw-1879",
+    "logFile": "agy-vibe-youtubekw-1879.log",
+    "status": "started"
+  },
+  {
+    "id": "vibe_1786894696045_kl2b",
+    "timestamp": 1786894696045,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/youtubekw",
+    "targetName": "youtubekw",
+    "prompt": "오픽 1급노하우도 추가",
+    "sessionName": "agy-vibe-youtubekw-5617",
+    "logFile": "agy-vibe-youtubekw-5617.log",
+    "status": "started"
+  },
+  {
     "id": "vibe_1786894524194_zs6w",
     "timestamp": 1786894524195,
     "mode": "modify",

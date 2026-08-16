@@ -244,6 +244,7 @@ const handleExecute = async (req, res) => {
   }
 
   const cleanSessionName = `${SESSION_PREFIX}${targetName.slice(0, 15)}-${Date.now().toString().slice(-4)}`;
+  const logFilePath = path.join(LOGS_DIR, `${cleanSessionName}.log`);
 
   try {
     try {
@@ -252,20 +253,17 @@ const handleExecute = async (req, res) => {
 
     // 1) Create new tmux session in target directory
     execFileSync('tmux', ['new-session', '-d', '-s', cleanSessionName, '-c', targetDir], { env: ENV });
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 400));
 
-    // 2) Launch agy in YOLO mode
-    const launchAgyCmd = `${AGY_BIN} --dangerously-skip-permissions`;
-    execFileSync('tmux', ['send-keys', '-t', cleanSessionName, launchAgyCmd, 'Enter'], { env: ENV });
+    // 2) Enable pipe-pane to save all terminal outputs directly to log file
+    try {
+      execFileSync('tmux', ['pipe-pane', '-t', cleanSessionName, '-o', `cat >> "${logFilePath}"`], { env: ENV });
+    } catch {}
 
-    // 3) Wait for agy terminal interface to be ready, then type prompt and press Enter
-    setTimeout(async () => {
-      try {
-        execFileSync('tmux', ['send-keys', '-t', cleanSessionName, prompt, 'Enter'], { env: ENV });
-      } catch (err) {
-        console.error('Failed to send prompt to agy session:', err);
-      }
-    }, 1800);
+    // 3) Run runner.sh script
+    const runnerScript = '/home/kw/kwsoft/vibe-maker/scripts/runner.sh';
+    const runCmd = `bash "${runnerScript}" "${targetDir}" "${targetName}" "${logFilePath}" "${prompt.replace(/"/g, '\\"')}"`;
+    execFileSync('tmux', ['send-keys', '-t', cleanSessionName, runCmd, 'Enter'], { env: ENV });
 
     saveHistory({
       mode,
@@ -279,7 +277,7 @@ const handleExecute = async (req, res) => {
 
     res.json({
       ok: true,
-      message: `⚡ [${targetName}] agy 세션을 열고 프롬프트를 순차 입력했습니다.`,
+      message: `⚡ [${targetName}]에 대해 agy 바이브 작업이 시작되었습니다.`,
       sessionName: cleanSessionName,
       targetDir,
     });
