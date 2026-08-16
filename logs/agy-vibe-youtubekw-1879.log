@@ -1,0 +1,24 @@
+[README.md](file:///home/kw/kwsoft/vibe-maker/README.md) 파일 상단에 **Vibe Maker 자동 테스트 성공** 문구를 추가하고 Git 커밋 및 푸시를 완료했습니다.
+
+### 적용 내용 ([README.md](file:///home/kw/kwsoft/vibe-maker/README.md))
+```markdown
+# ✅ Vibe Maker 자동 테스트 성공 (2026-08-17)
+
+# Vibe Maker (바이브 메이커)
+
+AI 에이전트(Antigravity CLI 등)와 연동하여 자연어 프롬프트를 바탕으로 애플리케이션 자동 생성, 유지보수, 실행 및 실시간 모니터링을 지원하는 통합 개발 관리 도구입니다.
+...
+```
+Reinitialized existing Git repository in /home/kw/kwsoft/youtubekw/.git/
+[master e330483] Auto update via agy
+ 1 file changed, 47 insertions(+), 39 deletions(-)
+🚀 [Auto-Register] Registering youtubekw on port 10148...
+▶ 설정 생성
+  /home/kw/kwserver/nginx/kwopi.duckdns.org.conf  (앱 26개)
+  /home/kw/kwserver/nginx/sy0519.duckdns.org.conf  (앱 2개)
+  /home/kw/kwserver/nginx/mj1210.duckdns.org.conf  (앱 0개)
+▶ 클라이언트 인증서 신뢰 목록 갱신
+▶ 백업
+▶ 반영
+✅ 반영 완료 (백업: /var/backups/kw-nginx/20260817_004236)
+✅ Nginx reloaded successfully via kw-apply-sites

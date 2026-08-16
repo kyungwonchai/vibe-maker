@@ -262,7 +262,7 @@ const handleExecute = async (req, res) => {
 
     // 3) Run runner.sh script
     const runnerScript = '/home/kw/kwsoft/vibe-maker/scripts/runner.sh';
-    const runCmd = `bash "${runnerScript}" "${targetDir}" "${targetName}" "${logFilePath}" "${prompt.replace(/"/g, '\\"')}"`;
+    const runCmd = `bash "${runnerScript}" "${targetDir}" "${targetName}" "${logFilePath}" "${cleanSessionName}" "${prompt.replace(/"/g, '\\"')}"`;
     execFileSync('tmux', ['send-keys', '-t', cleanSessionName, runCmd, 'Enter'], { env: ENV });
 
     saveHistory({
@@ -287,6 +287,46 @@ const handleExecute = async (req, res) => {
 };
 app.post('/api/execute', handleExecute);
 app.post('/vibe-maker/api/execute', handleExecute);
+
+// 3-1. Session Completion Webhook & Notification
+let lastCompletedEvent = null;
+
+const handleSessionDone = (req, res) => {
+  const { session, targetName, exitCode = 0 } = req.body;
+  const success = parseInt(exitCode, 10) === 0;
+  updateHistoryStatus(session, success ? 'completed' : 'failed');
+
+  lastCompletedEvent = {
+    id: 'evt_' + Date.now(),
+    session: session || '',
+    targetName: targetName || '앱',
+    success,
+    exitCode,
+    timestamp: Date.now(),
+  };
+
+  const broadcastData = JSON.stringify({
+    type: 'complete',
+    event: lastCompletedEvent,
+  });
+
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) {
+      try { client.send(broadcastData); } catch {}
+    }
+  });
+
+  res.json({ ok: true, event: lastCompletedEvent });
+};
+app.post('/api/session-done', handleSessionDone);
+app.post('/vibe-maker/api/session-done', handleSessionDone);
+
+const handleLatestEvent = (req, res) => {
+  res.json({ ok: true, lastCompletedEvent });
+};
+app.get('/api/latest-event', handleLatestEvent);
+app.get('/vibe-maker/api/latest-event', handleLatestEvent);
+
 
 // 4. Session Action (Ctrl+C, Kill)
 const handleSessionAction = (req, res) => {

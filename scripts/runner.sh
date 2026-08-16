@@ -2,7 +2,8 @@
 TARGET_DIR="$1"
 TARGET_NAME="$2"
 LOG_FILE="$3"
-PROMPT="$4"
+SESSION_NAME="$4"
+PROMPT="$5"
 
 cd "$TARGET_DIR" || exit 1
 
@@ -38,3 +39,9 @@ else
   echo "⚠️ [Vibe Maker] 작업 완료 (코드: $EXIT_CODE)"
 fi
 echo "=========================================="
+
+# Notify Vibe Maker server of completion
+curl -s -X POST http://127.0.0.1:10147/api/session-done \
+  -H "Content-Type: application/json" \
+  -d "{\"session\":\"$SESSION_NAME\",\"targetName\":\"$TARGET_NAME\",\"exitCode\":$EXIT_CODE}" 2>/dev/null || true
+

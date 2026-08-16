@@ -1,0 +1,29 @@
+**유튜브 앱(`youtubekw`) 상태 및 원인 확인 완료했습니다.**
+
+---
+
+### 1. 앱 동작 상태
+- **원인:** 백그라운드 프로세스가 내려가(Stopped) 있었습니다.
+- **조치:** 앱을 재기동 완료했습니다.
+  - **포트:** `10149` (HTTP 200 정상 응답 확인)
+  - **접속 URL:** [https://kwopi.duckdns.org/youtubekw/](https://kwopi.duckdns.org/youtubekw/)
+
+---
+
+### 2. kwboard에서 안 보였던 이유
+- 현재 [App.tsx](file:///home/kw/kwsoft/dashboard/src/App.tsx#L107) 설정상 **`실험실 🧪`** 탭이 아니라 **`공부 📚`** 탭(`services`)에 배치되어 있습니다.
+
+> 💡 **원하시면 `실험실 🧪` 탭이나 `즐겨찾기 ⭐` 탭에도 함께 나타나도록 즉시 추가/이동해 드릴까요?**
+Reinitialized existing Git repository in /home/kw/kwsoft/youtubekw/.git/
+[master 2b3f63e] Auto update via agy
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+🚀 [Auto-Register] Registering youtubekw on port 10148...
+▶ 설정 생성
+  /home/kw/kwserver/nginx/kwopi.duckdns.org.conf  (앱 26개)
+  /home/kw/kwserver/nginx/sy0519.duckdns.org.conf  (앱 2개)
+  /home/kw/kwserver/nginx/mj1210.duckdns.org.conf  (앱 0개)
+▶ 클라이언트 인증서 신뢰 목록 갱신
+▶ 백업
+▶ 반영
+✅ 반영 완료 (백업: /var/backups/kw-nginx/20260817_013526)
+✅ Nginx reloaded successfully via kw-apply-sites

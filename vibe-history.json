@@ -1,5 +1,49 @@
 [
   {
+    "id": "vibe_1786900115185_tnrb",
+    "timestamp": 1786900115185,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/youtubekw",
+    "targetName": "youtubekw",
+    "prompt": "🪄\n바이브 제작 / 수정\n모바일 음성·텍스트로 agy (YOLO) 원격 실행\n\nagy 작업 중\n🎯 작업 대상 선택\n🛠️ 기존 앱 수정\n✨ 신규 앱 제작\n앱 폴더 선택\n등재 앱 30개 표시 중\n⭐ KW보드 등재앱 (30)\n⚪ 기타/미등재 폴더 (26)\n전체 보기\n\n⭐ aivod (🌿 kwsoft)\n🎙️ 음성 인식 & 작업 명령 (프롬프트)\n\n🎤\n마이크 음성 인식 시작\n🇰🇷 KO\n🎨 모바일 UI 리팩토링\n🐛 버그 수정\n🌙 다크모드 추가\n🚀 미니앱 완성\n여기에 무엇을 만들거나 수정할지 말하거나 적으세요...\n예) 이 앱에 음성 녹음 기능과 자동 저장 버튼을 만들어줘.\n\n\n⚡ agy 실행하기 (YOLO 모드)\n💻 실시간 터미널 모니터링\n⏹️ 중단(Ctrl+C)\n🗑️ 세션 종료\nkw@fedorakw:~$\n📜 최근 명령 & 실행 로그 내역 (30일 보관)\n🔄 새로고침\n🛠️ 기존수정\nyoutubekw\n8. 17. 오전 01:34\n유튭앱 디졋냐 kwboard실험실에도안보이노\n📄 전체 실행 로그 보기\n🛠️ 기존수정\nbackimage\n8. 17. 오전 01:01\n이거 kwboard에등재된거아니냐 왜안되서브스가\n📄 전체 실행 로그 보기\n🛠️ 기존수정\nyoutubekw\n8. 17. 오전 12:44\n씨발 육상직캄도추가\n📄 전체 실행 로그 보기\n🛠️ 기존수정\nyoutubekw\n8. 17. 오전 12:41\nREADME.md 파일 상단에 Vibe Maker 자동 테스트 성공 문구 1줄 추가\n📄 전체 실행 로그 보기\n🛠️ 기존수정\nyoutubekw\n8. 17. 오전 12:38\n오픽 1급노하우도 추가\n📄 전체 실행 로그 보기\n🛠️ 기존수정\nyoutubekw\n8. 17. 오전 12:35\n오픽1급 노하우영상도 수집히게 버튼추가\n📄 전체 실행 로그 보기\n🛠️ 기존수정\nyoutubekw\n8. 17. 오전 12:23\n오픽도 되게 추가해줘 오픽al!취득목표\n📄 전체 실행 로그 보기\n🛠️ 기존수정\nvibe-maker\n8. 17. 오전 12:15\n수정할앱검색할수잇게해주고 녹음이 지금 몋배로불어나는 버그수정좀.이렇게됨       수정할  수정할  수정할 앱을  수정할 앱을 검색  수정할 앱을  수정할 앱을  수정할 앱을  수정할 앱을 검색할  수정할 앱을 검색할  수정할 앱을 검색할  수정할 앱을 검색할  수정할 앱을 검색할 수도  수정할 앱을 검색할 수도  수정할 앱을 검색할 수도 있게  수정할 앱을 검색할 수도 있게 좀 해\n📄 전체 실행 로그 보기\n📜 실행 로그 상세\n✕\n대상: youtubekw (/home/kw/kwsoft/youtubekw) | 시각: 2026. 8. 17. 오전 1:34:33\n명령: 유튭앱 디졋냐 kwboard실험실에도안보이노\n**유튜브 앱(`youtubekw`) 상태 및 원인 확인 완료했습니다.**\n\n---\n\n### 1. 앱 동작 상태\n- **원인:** 백그라운드 프로세스가 내려가(Stopped) 있었습니다.\n- **조치:** 앱을 재기동 완료했습니다.\n  - **포트:** `10149` (HTTP 200 정상 응답 확인)\n  - **접속 URL:** [https://kwopi.duckdns.org/youtubekw/](https://kwopi.duckdns.org/youtubekw/)\n\n---\n\n### 2. kwboard에서 안 보였던 이유\n- 현재 [App.tsx](file:///home/kw/kwsoft/dashboard/src/App.tsx#L107) 설정상 **`실험실 🧪`** 탭이 아니라 **`공부 📚`** 탭(`services`)에 배치되어 있습니다.\n\n> 💡 **원하시면 `실험실 🧪` 탭이나 `즐겨찾기 ⭐` 탭에도 함께 나타나도록 즉시 추가/이동해 드릴까요?**\nReinitialized existing Git repository in /home/kw/kwsoft/youtubekw/.git/\n[master 2b3f63e] Auto update via agy\n 2 files changed, 2 insertions(+), 1 deletion(-)\n🚀 [Auto-Register] Registering youtubekw on port 10148...\n▶ 설정 생성\n  /home/kw/kwserver/nginx/kwopi.duckdns.org.conf  (앱 26개)\n  /home/kw/kwserver/nginx/sy0519.duckdns.org.conf  (앱 2개)\n  /home/kw/kwserver/nginx/mj1210.duckdns.org.conf  (앱 0개)\n▶ 클라이언트 인증서 신뢰 목록 갱신\n▶ 백업\n▶ 반영\n✅ 반영 완료 (백업: /var/backups/kw-nginx/20260817_013526)\n✅ Nginx reloaded successfully via kw-apply-sites\nℹ️\n알림이거해도안더ㅓ노 수정종",
+    "sessionName": "agy-vibe-youtubekw-4752",
+    "logFile": "agy-vibe-youtubekw-4752.log",
+    "status": "started"
+  },
+  {
+    "id": "vibe_1786898073194_qahx",
+    "timestamp": 1786898073194,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/youtubekw",
+    "targetName": "youtubekw",
+    "prompt": "유튭앱 디졋냐 kwboard실험실에도안보이노",
+    "sessionName": "agy-vibe-youtubekw-2766",
+    "logFile": "agy-vibe-youtubekw-2766.log",
+    "status": "started"
+  },
+  {
+    "id": "vibe_1786896063886_ckqw",
+    "timestamp": 1786896063886,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/backimage",
+    "targetName": "backimage",
+    "prompt": "이거 kwboard에등재된거아니냐 왜안되서브스가",
+    "sessionName": "agy-vibe-backimage-3455",
+    "logFile": "agy-vibe-backimage-3455.log",
+    "status": "started"
+  },
+  {
+    "id": "vibe_1786895046843_pkg4",
+    "timestamp": 1786895046843,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/youtubekw",
+    "targetName": "youtubekw",
+    "prompt": "씨발 육상직캄도추가",
+    "sessionName": "agy-vibe-youtubekw-6415",
+    "logFile": "agy-vibe-youtubekw-6415.log",
+    "status": "started"
+  },
+  {
     "id": "vibe_1786894912298_vmqr",
     "timestamp": 1786894912298,
     "mode": "modify",

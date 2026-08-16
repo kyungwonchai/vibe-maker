@@ -1,0 +1,34 @@
+육상 직캠 카테고리를 YouTubeKW 앱에 추가 작업을 진행하고 있습니다. 곧 완료됩니다.
+**YouTubeKW** 앱에 **🏃‍♀️ 육상 직캠 (K-Track & Field Fancam)** 카테고리 및 수집 기능 추가를 완료했습니다.
+
+---
+
+### 🛠️ 작업 내용
+1. **육상 직캠 채널 프리셋 추가 (`track_fancam`)**
+   - **타깃/쿼리**: 국내외 4K/60fps 육상 대회 직캠, 100m, 400m 릴레이, 허들, 멀리뛰기 고화질 직캠
+   - **태그**: `#육상직캠`, `#직캠`, `#트랙앤필드`, `#4K직캠`, `#스포츠`
+   - **필터링 예외 적용**: 스포츠/직캠 특성에 맞춰 길이 및 운동 관련 키워드 차단 해제
+
+2. **프론트엔드 UI 반영**
+   - 상단 카테고리 탭에 **`🏃‍♀️ 육상 직캠`** 필터 추가
+   - 헤더 큐레이션 액션에 **`🏃‍♀️ 육상 직캠`** 원클릭 수집 버튼 추가 (핑크 테마)
+   - Vite 프론트엔드 빌드 및 서버 재시작 완료 (`Port: 10149`)
+
+3. **초기 직캠 영상 15개 큐레이션 완료**
+   - 최신 육상 직캠 영상 자동 수집 및 피드 반영 확인 완료
+Reinitialized existing Git repository in /home/kw/kwsoft/youtubekw/.git/
+[master 4d430cc] Auto update via agy
+ 8 files changed, 62 insertions(+), 37 deletions(-)
+ rename public/assets/{index-BhtpsziF.js => index-Bq2yDMXw.js} (95%)
+ create mode 100644 public/assets/index-CGBJ_iVx.css
+ delete mode 100644 public/assets/index-DijlQkd5.css
+🚀 [Auto-Register] Registering youtubekw on port 10148...
+▶ 설정 생성
+  /home/kw/kwserver/nginx/kwopi.duckdns.org.conf  (앱 26개)
+  /home/kw/kwserver/nginx/sy0519.duckdns.org.conf  (앱 2개)
+  /home/kw/kwserver/nginx/mj1210.duckdns.org.conf  (앱 0개)
+▶ 클라이언트 인증서 신뢰 목록 갱신
+▶ 백업
+▶ 반영
+✅ 반영 완료 (백업: /var/backups/kw-nginx/20260817_004638)
+✅ Nginx reloaded successfully via kw-apply-sites
