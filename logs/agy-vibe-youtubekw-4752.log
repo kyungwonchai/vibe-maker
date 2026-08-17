@@ -1,0 +1,41 @@
+**Vibe Maker(바이브 제작 / 수정) 작업 완료 알림(Notification) 기능 추가 및 수정이 완료되었습니다.**
+
+---
+
+### 🛠️ 작업 내용 요약
+
+1. **🔔 브라우저 웹 푸시 알림 (Web Notification API)**
+   - 상단 헤더에 **`🔔 알림 켜기 / 알림 켜짐`** 버튼 추가
+   - 작업 시작 시 또는 상단 버튼 터치 시 원클릭으로 브라우저 알림 권한을 요청하고, `agy` 작업 및 Git 배포 완료 시 브라우저 푸시 알림(백그라운드/다른 탭 상태에서도 동작)을 띄웁니다.
+
+2. **🎵 작업 완료 효과음 (Web Audio API 신디사이저 차임벨)**
+   - 별도 오디오 파일 다운로드 없이 브라우저 내장 오디오 엔진으로 경쾌한 **C-E-G-C 화음 알림음**을 자동 재생합니다.
+   - 스마트폰 화면이 꺼져있거나 다른 앱을 보고 있어도 작업 종료를 소리로 즉시 인지할 수 있습니다.
+
+3. **📳 모바일 진동 피드백 (Vibration API)**
+   - 모바일 기기 접속 시 완료 시점에 기기 진동 알림을 함께 울립니다.
+
+4. **⚡ 백엔드 세션 완료 웹훅 연동 (`server.mjs` & `runner.sh`)**
+   - `agy` 코딩 및 Git 푸시/자동 등록 완료 즉시 `/api/session-done` 웹훅을 호출하여 WebSocket 및 HTTP 폴링으로 프론트엔드에 실시간 완료 이벤트를 전달합니다.
+
+---
+
+### 🌐 바로 확인하기
+- [**Vibe Maker 접속 링크**](https://kwopi.duckdns.org/vibe-maker/)
+- 상단 헤더의 **`🔔 알림 켜기`** 버튼을 터치하여 알림 권한 허용 및 테스트 소리를 확인해 보세요!
+Reinitialized existing Git repository in /home/kw/kwsoft/youtubekw/.git/
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+🚀 [Auto-Register] Registering youtubekw on port 10148...
+▶ 설정 생성
+  /home/kw/kwserver/nginx/kwopi.duckdns.org.conf  (앱 26개)
+  /home/kw/kwserver/nginx/sy0519.duckdns.org.conf  (앱 2개)
+  /home/kw/kwserver/nginx/mj1210.duckdns.org.conf  (앱 0개)
+▶ 클라이언트 인증서 신뢰 목록 갱신
+▶ 백업
+▶ 반영
+✅ 반영 완료 (백업: /var/backups/kw-nginx/20260817_021126)
+✅ Nginx reloaded successfully via kw-apply-sites
