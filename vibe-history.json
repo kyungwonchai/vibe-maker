@@ -1,5 +1,16 @@
 [
   {
+    "id": "vibe_1786973793656_jhcu",
+    "timestamp": 1786973793656,
+    "mode": "modify",
+    "targetDir": "/home/kw/kwsoft/youtubekw",
+    "targetName": "youtubekw",
+    "prompt": "육상직캠파트는 지워안할거야",
+    "sessionName": "agy-vibe-youtubekw-2935",
+    "logFile": "agy-vibe-youtubekw-2935.log",
+    "status": "started"
+  },
+  {
     "id": "vibe_1786900115185_tnrb",
     "timestamp": 1786900115185,
     "mode": "modify",
