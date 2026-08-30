@@ -16,9 +16,12 @@ start() {
         fi
     fi
     echo "Starting Vibe Maker on port $PORT..."
-    nohup /usr/bin/node "$DIR/server.mjs" >> "$LOG_FILE" 2>&1 &
+    PORT="$PORT" setsid node "$DIR/server.mjs" >> "$LOG_FILE" 2>&1 &
     APP_PID=$!
     echo $APP_PID > "$PID_FILE"
+    disown $APP_PID 2>/dev/null
+    sleep 0.5
+    APP_PID=$!
     echo "Started (PID: $APP_PID, Port: $PORT)"
 }
 
